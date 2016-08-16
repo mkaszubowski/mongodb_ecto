@@ -53,7 +53,7 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   defmodule RenameModel do
-    use Ecto.Integration.Model
+    use Ecto.Integration.Schema
 
     schema "rename_migration" do
       field :to_be_renamed, :integer
@@ -79,12 +79,12 @@ defmodule Mongo.Ecto.MigrationsTest do
     def up do
       assert_raise ArgumentError, ~r"does not support SQL statements", fn ->
         execute "UPDATE posts SET published_at = NULL"
-        flush()
+        flush
       end
 
       assert_raise ArgumentError, ~r"does not support SQL statements", fn ->
         create table(:create_table_migration, options: "WITH ?")
-        flush()
+        flush
       end
     end
 
@@ -104,6 +104,14 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   import Ecto.Migrator, only: [up: 4, down: 4]
+
+  test "listCollections shouldn't include schema collection" do
+    TestRepo.insert! %RenameModel{to_be_renamed: 1}
+
+    assert !Enum.member?(Mongo.Ecto.list_collections(TestRepo), Ecto.Migration.SchemaMigration.__schema__(:source))
+
+    Mongo.Ecto.truncate(TestRepo)
+  end
 
   test "create and drop indexes" do
     assert :ok == up(TestRepo, 20050906120000, CreateMigration, log: false)

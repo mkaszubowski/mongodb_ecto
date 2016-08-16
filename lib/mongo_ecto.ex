@@ -169,8 +169,7 @@ defmodule Mongo.Ecto do
   For things that are not possible to express with Elixir's syntax in queries,
   you can use keyword fragments:
 
-      from p in Post, where: fragment(key:["$exists": true]), select: p
-
+      from p in Post, where: fragment("$exists": "name"), select: p
 
   To ease of using in more advanced queries, there is `Mongo.Ecto.Helpers` module
   you could import into modules dealing with queries.
@@ -395,7 +394,7 @@ defmodule Mongo.Ecto do
   end
 
   @doc false
-  def stop(pid, timeout) do
+  def stop(_module, pid, timeout) do
     ref = Process.monitor(pid)
     Process.exit(pid, :normal)
     receive do
@@ -429,6 +428,8 @@ defmodule Mongo.Ecto do
   end
   def load(Ecto.DateTime, %BSON.DateTime{} = datetime),
     do: datetime |> BSON.DateTime.to_datetime |> Ecto.DateTime.load
+  def load(module, %BSON.DateTime{} = datetime),
+    do: datetime |> BSON.DateTime.to_datetime |> module.load
   def load(type, data),
     do: Ecto.Type.load(type, data, &load/2)
 
@@ -452,15 +453,15 @@ defmodule Mongo.Ecto do
 
   @epoch :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
 
-  defp from_datetime(%Ecto.Date{year: year, month: month, day: day}),
+  def from_datetime(%Ecto.Date{year: year, month: month, day: day}),
     do: from_datetime({{year, month, day}, {0, 0, 0, 0}})
-  defp from_datetime(%Ecto.Time{hour: hour, min: min, sec: sec, usec: usec}),
+  def from_datetime(%Ecto.Time{hour: hour, min: min, sec: sec, usec: usec}),
     do: from_datetime({{1970, 1, 1}, {hour, min, sec, usec}})
-  defp from_datetime(%Ecto.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}),
+  def from_datetime(%Ecto.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}),
     do: from_datetime({{year, month, day}, {hour, min, sec, usec}})
-  defp from_datetime({_, _, _, _} = time),
+  def from_datetime({_, _, _, _} = time),
     do: from_datetime({{1970, 1, 1}, time})
-  defp from_datetime({date, {hour, min, sec, usec}}) do
+  def from_datetime({date, {hour, min, sec, usec}}) do
     greg_secs = :calendar.datetime_to_gregorian_seconds({date, {hour, min, sec}})
     epoch_secs = greg_secs - @epoch
     {:ok, %BSON.DateTime{utc: epoch_secs * 1000 + div(usec, 1000)}}
@@ -759,20 +760,18 @@ defmodule Mongo.Ecto do
   @list_collections_query ["$and": [[name: ["$not": special_regex]],
                                     [name: ["$not": migration_regex]]]]
 
-  @doc false
   def list_collections(repo, opts \\ []) do
-    list_collections(db_version(repo), repo, opts)
+    ver = db_version(repo)
+
+    list_collections(ver, repo, opts)
   end
 
-  defp list_collections(version, repo, opts) when version >= 3 do
-    colls = command(repo, %{"listCollections": 1}, opts)["cursor"]["firstBatch"]
+  defp list_collections(_ = 3, repo, opts) do
+    colls = command(repo, %{"listCollections": 1}, opts)
 
-    all_collections =
-      colls
-      |> Enum.map(&Map.fetch!(&1, "name"))
-      |> Enum.reject(&String.contains?(&1, "system."))
-
-    all_collections -- [@migration]
+    colls["cursor"]["firstBatch"]
+    |> Enum.map(&Map.fetch!(&1, "name"))
+    |> Enum.reject(&@migration == &1)
   end
 
   defp list_collections(_,repo, opts) do

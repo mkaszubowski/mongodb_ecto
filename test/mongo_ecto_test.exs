@@ -21,12 +21,6 @@ defmodule Mongo.EctoTest do
     assert [] == TestRepo.all(Post)
   end
 
-  test "inserting timestamps" do
-    post = TestRepo.insert!(%Post{})
-    assert post.inserted_at
-    assert post.updated_at
-  end
-
   test "javascript in query" do
     TestRepo.insert!(%Post{visits: 1})
 
@@ -122,11 +116,5 @@ defmodule Mongo.EctoTest do
 
     post = TestRepo.get(Post, post.id)
     assert post.meta == %{}
-  end
-
-  test "list_collections does not include schema collection" do
-    schema_collection = Ecto.Migration.SchemaMigration.__schema__(:source)
-
-    refute schema_collection in Mongo.Ecto.list_collections(TestRepo)
   end
 end
