@@ -89,6 +89,14 @@ defmodule Mongo.EctoTest do
     assert 10 == TestRepo.one(query)
   end
 
+
+  test "limit" do
+    TestRepo.insert!(%Post{visits: 15})
+    TestRepo.insert!(%Post{visits: 10})
+
+    assert [_, _] = from(p in Post, limit: 2) |> TestRepo.all
+  end
+
   # test "partial update in map" do
   #   post = TestRepo.insert!(%Post{meta: %{author: %{name: "michal"}, other: "value"}})
   #   TestRepo.update_all(Post, set: [meta: change_map("author.name", "michal")])
