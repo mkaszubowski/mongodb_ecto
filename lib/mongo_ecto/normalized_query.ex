@@ -403,6 +403,9 @@ defmodule Mongo.Ecto.NormalizedQuery do
   defp pair({op, _, [left, right]}, params, pk, query, place) when op in @binary_ops do
     {field(left, pk, query, place), [{binary_op(op), value(right, params, pk, query, place)}]}
   end
+  defp pair({:not, _, [{:in, _, [left, {:^, _, [0, 0]}]}]}, params, pk, query, place) do
+    {field(left, pk, query, place), ["$nin": []]}
+  end
   defp pair({:not, _, [{:in, _, [left, {:^, _, [ix, len]}]}]}, params, pk, query, place) do
     args =
       ix..ix+len-1

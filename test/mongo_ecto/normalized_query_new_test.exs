@@ -247,8 +247,14 @@ defmodule Mongo.Ecto.NormalizedQueryNewTest do
     query = Schema |> where([r], r.x in [2]) |> normalize
     assert_fields query, query: %{x: ["$in": [2]]}
 
+    query = Schema |> where([r], r.x in []) |> normalize
+    assert_fields query, query: %{x: ["$in": []]}
+
     query = Schema |> where([r], not r.x in [2, 3]) |> normalize
     assert_fields query, query: %{x: ["$nin": [2, 3]]}
+
+    query = Schema |> where([r], not(r.x in ^[])) |> normalize
+    assert_fields query, query: %{x: ["$nin": []]}
   end
 
   test "order by" do
