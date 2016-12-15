@@ -709,6 +709,8 @@ defmodule Mongo.Ecto do
     end
   end
 
+  def in_transaction?(_), do: false
+
   ## Mongo specific calls
 
   @doc """
