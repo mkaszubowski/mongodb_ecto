@@ -1,4 +1,4 @@
-defmodule Mongo.Ecto.AdminPool do
+defmodule Mongo.EctoOne.AdminPool do
   @moduledoc false
 
   use Mongo.Pool, name: __MODULE__, adapter: Mongo.Pool.Poolboy

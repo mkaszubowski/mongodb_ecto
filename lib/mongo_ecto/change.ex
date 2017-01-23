@@ -1,20 +1,20 @@
-defmodule Mongo.Ecto.ChangeMap do
+defmodule Mongo.EctoOne.ChangeMap do
   @moduledoc """
-  An Ecto type to represent a partial update of a nested document
+  An EctoOne type to represent a partial update of a nested document
 
   ## Using in queries
 
-      change = Mongo.Ecto.Helpers.change_map("name", "name")
+      change = Mongo.EctoOne.Helpers.change_map("name", "name")
       MyRepo.update_all Post, set: [author: change]
   """
 
-  @behaviour Ecto.Type
+  @behaviour EctoOne.Type
 
   defstruct [:field, :value]
   @type t :: %__MODULE__{field: String.t, value: term}
 
   @doc """
-  The Ecto primitive type
+  The EctoOne primitive type
   """
   def type, do: :any
 
@@ -36,23 +36,23 @@ defmodule Mongo.Ecto.ChangeMap do
   def load(_), do: :error
 end
 
-defmodule Mongo.Ecto.ChangeArray do
+defmodule Mongo.EctoOne.ChangeArray do
   @moduledoc """
-  An Ecto type to represent a partial update of a nested document
+  An EctoOne type to represent a partial update of a nested document
 
   ## Using in queries
 
-      change = Mongo.Ecto.Helpers.change_array("0.name", "name")
+      change = Mongo.EctoOne.Helpers.change_array("0.name", "name")
       MyRepo.update_all Post, set: [authors: change]
   """
 
-  @behaviour Ecto.Type
+  @behaviour EctoOne.Type
 
   defstruct [:field, :value]
   @type t :: %__MODULE__{field: String.t, value: term}
 
   @doc """
-  The Ecto primitive type
+  The EctoOne primitive type
   """
   def type, do: {:array, :any}
 

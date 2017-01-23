@@ -1,13 +1,13 @@
-defmodule Mongo.Ecto.NormalizedQueryTest do
+defmodule Mongo.EctoOne.NormalizedQueryTest do
   use ExUnit.Case, async: true
 
-  alias Mongo.Ecto.NormalizedQuery
+  alias Mongo.EctoOne.NormalizedQuery
 
-  alias Ecto.Queryable
-  import Ecto.Query
+  alias EctoOne.Queryable
+  import EctoOne.Query
 
   defmodule Model do
-    use Ecto.Model
+    use EctoOne.Model
 
     schema "model" do
       field :x, :integer
@@ -16,11 +16,11 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     end
   end
 
-  @id_types %{binary_id: Mongo.Ecto.ObjectID}
+  @id_types %{binary_id: Mongo.EctoOne.ObjectID}
 
   defp normalize(query, operation \\ :all) do
-    {query, params, _key} = Ecto.Query.Planner.prepare(query, operation, Mongo.Ecto)
-    query = Ecto.Query.Planner.normalize(query, operation, Mongo.Ecto)
+    {query, params, _key} = EctoOne.Query.Planner.prepare(query, operation, Mongo.EctoOne)
+    query = EctoOne.Query.Planner.normalize(query, operation, Mongo.EctoOne)
     apply(NormalizedQuery, operation, [query, params])
   end
 
@@ -106,11 +106,11 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     query = Model |> select([r], count(r.id)) |> where([r], r.x > 10) |> normalize
     assert_query(query, coll: "model", query: %{x: ["$gt": 10]})
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> select([r], {r.id, count(r.id)}) |> normalize
     end
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> select([r], {count(r.id), r.id}) |> normalize
     end
   end
@@ -129,7 +129,7 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     assert_query(query, coll: "model",
                  pipeline: [["$limit": 3], ["$skip": 5], group_stage])
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> select([r], {max(r.x), r.id}) |> normalize
     end
   end
@@ -148,7 +148,7 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     assert_query(query, coll: "model",
                  pipeline: [["$limit": 3], ["$skip": 5], group_stage])
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> select([r], {min(r.x), r.id}) |> normalize
     end
   end
@@ -167,7 +167,7 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     assert_query(query, coll: "model",
                  pipeline: [["$limit": 3], ["$skip": 5], group_stage])
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> select([r], {sum(r.x), r.id}) |> normalize
     end
   end
@@ -186,7 +186,7 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     assert_query(query, coll: "model",
                  pipeline: [["$limit": 3], ["$skip": 5], group_stage])
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> select([r], {avg(r.x), r.id}) |> normalize
     end
   end
@@ -217,13 +217,13 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
   end
 
   test "lock" do
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> lock("FOR SHARE NOWAIT") |> normalize
     end
   end
 
   test "sql fragments" do
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> select([r], fragment("downcase(?)", r.x)) |> normalize
     end
   end
@@ -250,11 +250,11 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
   end
 
   test "distinct" do
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> distinct([r], r.x) |> select([r], {r.x, r.y}) |> normalize
     end
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> distinct(true) |> select([r], {r.x, r.y}) |> normalize
     end
   end
@@ -345,23 +345,23 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     query = Model |> where([e], 1 in e.z) |> normalize
     assert_query(query, query: %{z: 1})
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> where([e], 1 in ^[]) |> normalize
     end
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> where([e], e.x in [1, e.x, 3]) |> normalize
     end
   end
 
   test "having" do
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> having([p], p.x == p.x) |> normalize
     end
   end
 
   test "group by" do
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       Model |> group_by([r], r.x) |> select([r], r.x) |> normalize
     end
   end
@@ -404,11 +404,11 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     query = from(m in Model, update: [set: [x: 0]], update: [set: [y: 123]]) |> normalize(:update_all)
     assert_query(query, command: %{"$set": [x: 0, y: 123]})
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       from(m in Model, limit: 5, update: [set: [x: 0]]) |> normalize(:update_all)
     end
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       from(m in Model, offset: 5, update: [set: [x: 0]]) |> normalize(:update_all)
     end
   end
@@ -428,11 +428,11 @@ defmodule Mongo.Ecto.NormalizedQueryTest do
     query = from(e in Model, where: e.x == 123) |> normalize(:delete_all)
     assert_query(query, query: %{x: 123})
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       from(m in Model, limit: 5) |> normalize(:delete_all)
     end
 
-    assert_raise Ecto.QueryError, fn ->
+    assert_raise EctoOne.QueryError, fn ->
       from(m in Model, offset: 5) |> normalize(:delete_all)
     end
   end

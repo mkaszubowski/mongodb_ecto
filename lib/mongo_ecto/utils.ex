@@ -1,4 +1,4 @@
-defmodule Mongo.Ecto.Utils do
+defmodule Mongo.EctoOne.Utils do
   @moduledoc false
 
   # Make sure you use this before is_list/1

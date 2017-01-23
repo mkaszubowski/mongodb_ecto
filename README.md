@@ -1,32 +1,32 @@
-# Mongo.Ecto
+# Mongo.EctoOne
 
-[![Travis Build Status](https://img.shields.io/travis/michalmuskala/mongodb_ecto.svg)](https://travis-ci.org/michalmuskala/mongodb_ecto)
-[![Coveralls Coverage](https://img.shields.io/coveralls/michalmuskala/mongodb_ecto.svg)](https://coveralls.io/github/michalmuskala/mongodb_ecto)
-[![Inline docs](http://inch-ci.org/github/michalmuskala/mongodb_ecto.svg?branch=master)](http://inch-ci.org/github/michalmuskala/mongodb_ecto)
+[![Travis Build Status](https://img.shields.io/travis/michalmuskala/mongodb_ecto_one.svg)](https://travis-ci.org/michalmuskala/mongodb_ecto_one)
+[![Coveralls Coverage](https://img.shields.io/coveralls/michalmuskala/mongodb_ecto_one.svg)](https://coveralls.io/github/michalmuskala/mongodb_ecto_one)
+[![Inline docs](http://inch-ci.org/github/michalmuskala/mongodb_ecto_one.svg?branch=master)](http://inch-ci.org/github/michalmuskala/mongodb_ecto_one)
 
-`Mongo.Ecto` is a MongoDB adapter for Ecto.
+`Mongo.EctoOne` is a MongoDB adapter for EctoOne.
 
-For detailed information read the documentation for the `Mongo.Ecto` module,
+For detailed information read the documentation for the `Mongo.EctoOne` module,
 or check out examples below.
 
 ## Example
 ```elixir
 # In your config/config.exs file
 config :my_app, Repo,
-  database: "ecto_simple",
+  database: "ecto_one_simple",
   username: "mongodb",
   password: "mongosb",
   hostname: "localhost"
 
 # In your application code
 defmodule Repo do
-  use Ecto.Repo,
+  use EctoOne.Repo,
     otp_app: :my_app,
-    adapter: Mongo.Ecto
+    adapter: Mongo.EctoOne
 end
 
 defmodule Weather do
-  use Ecto.Model
+  use EctoOne.Model
 
   @primary_key {:id, :binary_id, autogenerate: true}
   schema "weather" do
@@ -38,7 +38,7 @@ defmodule Weather do
 end
 
 defmodule Simple do
-  import Ecto.Query
+  import EctoOne.Query
 
   def sample_query do
     query = from w in Weather,
@@ -51,46 +51,46 @@ end
 
 ## Usage
 
-Add Mongo.Ecto as a dependency in your `mix.exs` file.
+Add Mongo.EctoOne as a dependency in your `mix.exs` file.
 ```elixir
 def deps do
-  [{:mongodb_ecto, "~> 0.1"}]
+  [{:mongodb_ecto_one, "~> 0.1"}]
 end
 ```
 
 You should also update your applications to include both projects.
 ```elixir
 def application do
-  [applications: [:logger, :mongodb_ecto, :ecto]]
+  [applications: [:logger, :mongodb_ecto_one, :ecto_one]]
 end
 ```
 
 To use the adapter in your repo:
 ```elixir
 defmodule MyApp.Repo do
-  use Ecto.Repo,
+  use EctoOne.Repo,
     otp_app: :my_app,
-    adapter: Mongo.Ecto
+    adapter: Mongo.EctoOne
 end
 ```
 
-For additional information on usage please see the documentation for [Ecto](http://hexdocs.pm/ecto).
+For additional information on usage please see the documentation for [EctoOne](http://hexdocs.pm/ecto_one).
 
 ## Data Type Mapping
 
-|   BSON                |Ecto|
+|   BSON                |EctoOne|
 |   ----------          |------|
 |   double              |`:float`|
 |   string              |`:string`|
 |   object              |`:map`|
 |   array               |`{:array, subtype}`|
 |   binary data         |`:binary`|
-|   binary data (uuid)  |`Ecto.UUID`|
+|   binary data (uuid)  |`EctoOne.UUID`|
 |   object id           |`:binary_id`|
 |   boolean             |`:boolean`|
-|   date                |`Ecto.DateTime`|
-|   regular expression  |`Mongo.Ecto.Regex`|
-|   JavaScript          |`Mongo.Ecto.JavaScript`|
+|   date                |`EctoOne.DateTime`|
+|   regular expression  |`Mongo.EctoOne.Regex`|
+|   JavaScript          |`Mongo.EctoOne.JavaScript`|
 |   symbol              |(see below)|
 |   32-bit integer      |`:integer`|
 |   timestamp           |`BSON.Timestamp`|
@@ -103,7 +103,7 @@ the database.
 
 Additionally special values are translated as follows:
 
-|	BSON        |     	Ecto|
+|	BSON        |     	EctoOne|
 |	----------  |      	------|
 |    null     |           `nil`|
 |    min key  |           `:BSON_min`|
@@ -119,11 +119,11 @@ branches: 2.4.x, 2.6.x, 3.0.x
 
 ## Contributing
 
-To contribute you need to compile `Mongo.Ecto` from source and test it:
+To contribute you need to compile `Mongo.EctoOne` from source and test it:
 
 ```
-$ git clone https://github.com/michalmuskala/mongodb_ecto.git
-$ cd mongodb_ecto
+$ git clone https://github.com/michalmuskala/mongodb_ecto_one.git
+$ cd mongodb_ecto_one
 $ mix test
 ```
 

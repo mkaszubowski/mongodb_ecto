@@ -1,20 +1,20 @@
-defmodule Mongo.Ecto.JavaScript do
+defmodule Mongo.EctoOne.JavaScript do
   @moduledoc """
-  An Ecto type to represent MongoDB's JavaScript functions
+  An EctoOne type to represent MongoDB's JavaScript functions
 
   ## Using in queries
 
-      javascript = Mongo.Ecto.Helpers.javascript("this.visits === count", count: 1)
+      javascript = Mongo.EctoOne.Helpers.javascript("this.visits === count", count: 1)
       from p in Post, where: ^javascript
   """
 
-  @behaviour Ecto.Type
+  @behaviour EctoOne.Type
 
   defstruct BSON.JavaScript |> Map.from_struct |> Enum.to_list
   @type t :: %__MODULE__{code: String.t, scope: %{}}
 
   @doc """
-  The Ecto primitive type.
+  The EctoOne primitive type.
   """
   def type, do: :any
 
@@ -27,7 +27,7 @@ defmodule Mongo.Ecto.JavaScript do
     do: :error
 
   @doc """
-  Converts a `Mongo.Ecto.JavaScript` into `BSON.JavaScript`
+  Converts a `Mongo.EctoOne.JavaScript` into `BSON.JavaScript`
   """
   def dump(%__MODULE__{} = js),
     do: {:ok, Map.put(js, :__struct__, BSON.JavaScript)}
@@ -35,7 +35,7 @@ defmodule Mongo.Ecto.JavaScript do
     do: :error
 
   @doc """
-  Converts a `BSON.JavaScript` into `Mongo.Ecto.JavaScript`
+  Converts a `BSON.JavaScript` into `Mongo.EctoOne.JavaScript`
   """
   def load(%BSON.JavaScript{} = js),
     do: {:ok, Map.put(js, :__struct__, __MODULE__)}

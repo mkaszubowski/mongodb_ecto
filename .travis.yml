@@ -2,7 +2,7 @@ language: elixir
 
 cache:
   - apt
-  - directories:
+  - directo_oneries:
       - ~/.mongodb
 
 elixir:

@@ -1,11 +1,11 @@
-defmodule Mongo.Ecto.MigrationsTest do
+defmodule Mongo.EctoOne.MigrationsTest do
   use ExUnit.Case
 
-  alias Ecto.Integration.TestRepo
-  import Ecto.Query, only: [from: 2]
+  alias EctoOne.Integration.TestRepo
+  import EctoOne.Query, only: [from: 2]
 
   defmodule CreateMigration do
-    use Ecto.Migration
+    use EctoOne.Migration
 
     @table table(:create_table_migration, options: [autoIndexId: false])
     @index index(:create_table_migration, [:value], unique: true)
@@ -24,7 +24,7 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   defmodule RenameMigration do
-    use Ecto.Migration
+    use EctoOne.Migration
 
     @table_current table(:posts_migration)
     @table_new table(:new_posts_migration)
@@ -40,7 +40,7 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   defmodule NoErrorTableMigration do
-    use Ecto.Migration
+    use EctoOne.Migration
 
     def up do
       create_if_not_exists table(:existing)
@@ -53,7 +53,7 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   defmodule RenameModel do
-    use Ecto.Integration.Schema
+    use EctoOne.Integration.Schema
 
     schema "rename_migration" do
       field :to_be_renamed, :integer
@@ -62,7 +62,7 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   defmodule RenameColumnMigration do
-    use Ecto.Migration
+    use EctoOne.Migration
 
     def up do
       rename table(:rename_migration), :to_be_renamed, to: :was_renamed
@@ -74,7 +74,7 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   defmodule SQLMigration do
-    use Ecto.Migration
+    use EctoOne.Migration
 
     def up do
       assert_raise ArgumentError, ~r"does not support SQL statements", fn ->
@@ -94,7 +94,7 @@ defmodule Mongo.Ecto.MigrationsTest do
   end
 
   defmodule ReferencesMigration do
-    use Ecto.Migration
+    use EctoOne.Migration
 
     def change do
       create table(:reference_migration) do
@@ -103,14 +103,14 @@ defmodule Mongo.Ecto.MigrationsTest do
     end
   end
 
-  import Ecto.Migrator, only: [up: 4, down: 4]
+  import EctoOne.Migrator, only: [up: 4, down: 4]
 
   test "listCollections shouldn't include schema collection" do
     TestRepo.insert! %RenameModel{to_be_renamed: 1}
 
-    assert !Enum.member?(Mongo.Ecto.list_collections(TestRepo), Ecto.Migration.SchemaMigration.__schema__(:source))
+    assert !Enum.member?(Mongo.EctoOne.list_collections(TestRepo), EctoOne.Migration.SchemaMigration.__schema__(:source))
 
-    Mongo.Ecto.truncate(TestRepo)
+    Mongo.EctoOne.truncate(TestRepo)
   end
 
   test "create and drop indexes" do

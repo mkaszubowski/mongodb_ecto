@@ -1,4 +1,4 @@
-defmodule Mongo.Ecto.NormalizedQuery do
+defmodule Mongo.EctoOne.NormalizedQuery do
   @moduledoc false
 
   defmodule ReadQuery do
@@ -32,9 +32,9 @@ defmodule Mongo.Ecto.NormalizedQuery do
     defstruct coll: nil, pk: nil, fields: [], pipeline: [], database: nil, opts: []
   end
 
-  alias Mongo.Ecto.Conversions
-  alias Ecto.Query.Tagged
-  alias Ecto.Query
+  alias Mongo.EctoOne.Conversions
+  alias EctoOne.Query.Tagged
+  alias EctoOne.Query
 
   defmacrop is_op(op) do
     quote do
@@ -300,7 +300,7 @@ defmodule Mongo.Ecto.NormalizedQuery do
     do: {field(expr, pk, query, "order clause"), -1}
 
   @maybe_disallowed ~w(distinct lock joins group_bys havings limit offset)a
-  @query_empty_values %Ecto.Query{} |> Map.take(@maybe_disallowed)
+  @query_empty_values %EctoOne.Query{} |> Map.take(@maybe_disallowed)
 
   defp check_query!(query, allow \\ []) do
     @query_empty_values
@@ -314,10 +314,10 @@ defmodule Mongo.Ecto.NormalizedQuery do
   defp check(expr, expr, _, _),
     do: nil
   defp check(_, _, query, message),
-    do: raise(Ecto.QueryError, query: query, message: message)
+    do: raise(EctoOne.QueryError, query: query, message: message)
 
   defp value(expr, pk, place) do
-    case Conversions.from_ecto_pk(expr, pk) do
+    case Conversions.from_ecto_one_pk(expr, pk) do
       {:ok, value} -> value
       :error       -> error(place)
     end
@@ -452,7 +452,7 @@ defmodule Mongo.Ecto.NormalizedQuery do
   end
 
   defp error(query, place) do
-    raise Ecto.QueryError, query: query,
+    raise EctoOne.QueryError, query: query,
       message: "Invalid expression for MongoDB adapter in #{place}"
   end
   defp error(place) do

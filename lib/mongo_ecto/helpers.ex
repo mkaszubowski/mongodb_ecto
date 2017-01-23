@@ -1,4 +1,4 @@
-defmodule Mongo.Ecto.Helpers do
+defmodule Mongo.EctoOne.Helpers do
   @moduledoc """
   Defines helpers to ease working with MongoDB in models or other places
   where you work with them. You'd probably want to import it.
@@ -18,9 +18,9 @@ defmodule Mongo.Ecto.Helpers do
       from p in Post,
         where: ^javascript("this.value === value", value: 1)
   """
-  @spec javascript(String.t, Keyword.t) :: Mongo.Ecto.JavaScript.t
+  @spec javascript(String.t, Keyword.t) :: Mongo.EctoOne.JavaScript.t
   def javascript(code, scope \\ []) do
-    %Mongo.Ecto.JavaScript{code: code, scope: scope}
+    %Mongo.EctoOne.JavaScript{code: code, scope: scope}
   end
 
   @doc """
@@ -31,11 +31,11 @@ defmodule Mongo.Ecto.Helpers do
       from p in Post,
         where: fragment(title: ^regex("elixir", "i"))
 
-  For supported options please see `Mongo.Ecto.Regex` module documentation.
+  For supported options please see `Mongo.EctoOne.Regex` module documentation.
   """
-  @spec regex(String.t, String.t) :: Mongo.Ecto.Regex.t
+  @spec regex(String.t, String.t) :: Mongo.EctoOne.Regex.t
   def regex(pattern, options \\ "") do
-    %Mongo.Ecto.Regex{pattern: pattern, options: options}
+    %Mongo.EctoOne.Regex{pattern: pattern, options: options}
   end
 
   @doc """
@@ -46,9 +46,9 @@ defmodule Mongo.Ecto.Helpers do
       MyRepo.update_all(Post,
         set: [meta: change_map("author.name", "NewName")])
   """
-  @spec change_map(String.t, term) :: Mongo.Ecto.ChangeMap.t
+  @spec change_map(String.t, term) :: Mongo.EctoOne.ChangeMap.t
   def change_map(field, value) do
-    %Mongo.Ecto.ChangeMap{field: field, value: value}
+    %Mongo.EctoOne.ChangeMap{field: field, value: value}
   end
 
   @doc """
@@ -59,8 +59,8 @@ defmodule Mongo.Ecto.Helpers do
       MyRepo.update_all(Post,
         set: [comments: change_array(0, "author", "NewName")])
   """
-  @spec change_array(pos_integer, String.t, term) :: Mongo.Ecto.ChangeArray.t
+  @spec change_array(pos_integer, String.t, term) :: Mongo.EctoOne.ChangeArray.t
   def change_array(idx, field \\ "", value) when is_integer(idx) do
-    %Mongo.Ecto.ChangeArray{field: "#{idx}.#{field}", value: value}
+    %Mongo.EctoOne.ChangeArray{field: "#{idx}.#{field}", value: value}
   end
 end

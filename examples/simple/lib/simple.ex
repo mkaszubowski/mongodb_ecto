@@ -12,11 +12,11 @@ defmodule Simple.App do
 end
 
 defmodule Simple.Repo do
-  use Ecto.Repo, otp_app: :simple
+  use EctoOne.Repo, otp_app: :simple
 end
 
 defmodule Weather do
-  use Ecto.Model
+  use EctoOne.Model
 
   @primary_key {:id, :binary_id, autogenerate: true}
 
@@ -30,7 +30,7 @@ defmodule Weather do
 end
 
 defmodule Simple do
-  import Ecto.Query
+  import EctoOne.Query
 
   def sample_query do
     query = from w in Weather,

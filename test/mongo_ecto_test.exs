@@ -1,23 +1,23 @@
-defmodule Mongo.EctoTest do
-  use Ecto.Integration.Case
+defmodule Mongo.EctoOneTest do
+  use EctoOne.Integration.Case
 
-  alias Ecto.Integration.TestRepo
-  alias Ecto.Integration.Post
-  alias Ecto.Integration.Tag
-  alias Ecto.Integration.Order
-  alias Ecto.Integration.Item
+  alias EctoOne.Integration.TestRepo
+  alias EctoOne.Integration.Post
+  alias EctoOne.Integration.Tag
+  alias EctoOne.Integration.Order
+  alias EctoOne.Integration.Item
 
-  import Ecto.Query, only: [from: 2]
-  import Mongo.Ecto.Helpers
+  import EctoOne.Query, only: [from: 2]
+  import Mongo.EctoOne.Helpers
 
   test "command/3" do
-    assert %{"ok" => 1.0} == Mongo.Ecto.command(TestRepo, ping: 1)
+    assert %{"ok" => 1.0} == Mongo.EctoOne.command(TestRepo, ping: 1)
   end
 
   test "truncate/2" do
     TestRepo.insert!(%Post{})
 
-    Mongo.Ecto.truncate(TestRepo)
+    Mongo.EctoOne.truncate(TestRepo)
     assert [] == TestRepo.all(Post)
   end
 
@@ -94,7 +94,7 @@ defmodule Mongo.EctoTest do
     assert TestRepo.get!(Post, post.id).meta ==
       %{"author" => %{"name" => "michal"}, "other" => "value"}
 
-    order = Ecto.Changeset.change(%Order{}, item: %Item{price: 1})
+    order = EctoOne.Changeset.change(%Order{}, item: %Item{price: 1})
     order = TestRepo.insert!(order)
     TestRepo.update_all(Order, set: [item: change_map("price", 10)])
 
@@ -102,7 +102,7 @@ defmodule Mongo.EctoTest do
   end
 
   test "partial update in array" do
-    tag = Ecto.Changeset.change(%Tag{}, items: [%Item{price: 1}])
+    tag = EctoOne.Changeset.change(%Tag{}, items: [%Item{price: 1}])
     tag = TestRepo.insert!(tag)
     TestRepo.update_all(Tag, set: [items: change_array(0, "price", 10)])
 

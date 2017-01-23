@@ -1,6 +1,6 @@
-defmodule Mongo.Ecto.Regex do
+defmodule Mongo.EctoOne.Regex do
   @moduledoc """
-  An Ecto type to represent MongoDB's Regex objects
+  An EctoOne type to represent MongoDB's Regex objects
 
   Both MongoDB and Elixir use PCRE (Pearl Compatible Regular Expressions),
   so the syntax is similar for both.
@@ -11,7 +11,7 @@ defmodule Mongo.Ecto.Regex do
 
   One is to use regex object:
 
-      regex = Mongo.Ecto.Helpers.regex("elixir", "i")
+      regex = Mongo.EctoOne.Helpers.regex("elixir", "i")
       from p in Post, where: fragment(title: ^regex)
 
   The other one is to use the `$regex` operator:
@@ -33,14 +33,14 @@ defmodule Mongo.Ecto.Regex do
       with the `$option` operator
   """
 
-  @behaviour Ecto.Type
+  @behaviour EctoOne.Type
 
   defstruct BSON.Regex |> Map.from_struct |> Enum.to_list
   @type t :: %__MODULE__{pattern: String.t, options: String.t}
 
 
   @doc """
-  The Ecto primitive type.
+  The EctoOne primitive type.
   """
   def type, do: :any
 
@@ -54,7 +54,7 @@ defmodule Mongo.Ecto.Regex do
     do: :error
 
   @doc """
-  Converts a `Mongo.Ecto.Regex` into `BSON.Regex`
+  Converts a `Mongo.EctoOne.Regex` into `BSON.Regex`
   """
   def dump(%__MODULE__{} = js),
     do: {:ok, Map.put(js, :__struct__, BSON.Regex)}
@@ -62,7 +62,7 @@ defmodule Mongo.Ecto.Regex do
     do: :error
 
   @doc """
-  Converts a `BSON.Regex` into `Mongo.Ecto.Regex`
+  Converts a `BSON.Regex` into `Mongo.EctoOne.Regex`
   """
   def load(%BSON.Regex{} = js),
     do: {:ok, Map.put(js, :__struct__, __MODULE__)}

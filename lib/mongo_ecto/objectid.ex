@@ -1,14 +1,14 @@
-defmodule Mongo.Ecto.ObjectID do
+defmodule Mongo.EctoOne.ObjectID do
   @moduledoc """
-  An Ecto type to represent MongoDB's ObjectIDs
+  An EctoOne type to represent MongoDB's ObjectIDs
 
   Represented as hex-encoded binaries of 24 characters.
   """
 
-  @behaviour Ecto.Type
+  @behaviour EctoOne.Type
 
   @doc """
-  The Ecto primitive type.
+  The EctoOne primitive type.
   """
   def type, do: :binary_id
 

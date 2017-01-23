@@ -1,34 +1,34 @@
-defmodule Mongo.Ecto do
+defmodule Mongo.EctoOne do
   @moduledoc """
-  Ecto integration with MongoDB.
+  EctoOne integration with MongoDB.
 
-  This document will present a general overview of using MongoDB with Ecto,
+  This document will present a general overview of using MongoDB with EctoOne,
   including common pitfalls and extra functionalities.
 
-  Check the [Ecto documentation](http://hexdocs.pm/ecto) for an introduction
-  or [examples/simple](https://github.com/michalmuskala/mongodb_ecto/tree/master/examples/simple)
-  for a sample application using Ecto and MongoDB.
+  Check the [EctoOne documentation](http://hexdocs.pm/ecto_one) for an introduction
+  or [examples/simple](https://github.com/michalmuskala/mongodb_ecto_one/tree/master/examples/simple)
+  for a sample application using EctoOne and MongoDB.
 
   ## Repositories
 
-  The first step to use MongoDB with Ecto is to define a repository
-  with `Mongo.Ecto` as an adapter. First define a module:
+  The first step to use MongoDB with EctoOne is to define a repository
+  with `Mongo.EctoOne` as an adapter. First define a module:
 
       defmodule Repo do
-        use Ecto.Repo, otp_app: :my_app
+        use EctoOne.Repo, otp_app: :my_app
       end
 
   Then configure it your application environment, usually in your
   `config/config.exs`:
 
       config :my_app, Repo,
-        adapter: Mongo.Ecto,
-        database: "ecto_simple",
+        adapter: Mongo.EctoOne,
+        database: "ecto_one_simple",
         username: "mongodb",
         password: "mongodb",
         hostname: "localhost"
 
-  Each repository in Ecto defines a `start_link/0` function that needs to
+  Each repository in EctoOne defines a `start_link/0` function that needs to
   be invoked before using the repository. This function is generally from
   your supervision tree:
 
@@ -48,7 +48,7 @@ defmodule Mongo.Ecto do
   With the repository defined, we can define our models:
 
       defmodule Weather do
-        use Ecto.Model
+        use EctoOne.Model
 
         # see the note below for explanation of that line
         @primary_key {:id, :binary_id, autogenerate: true}
@@ -62,7 +62,7 @@ defmodule Mongo.Ecto do
         end
       end
 
-  Ecto defaults to using `:id` type for primary keys, that is translated to
+  EctoOne defaults to using `:id` type for primary keys, that is translated to
   `:integer` for SQL databases, and is not handled by MongoDB. You need to
   specify the primary key to use the `:binary_id` type, that the adapter will
   translate to ObjectID. Remember to place this declaration before the
@@ -81,17 +81,17 @@ defmodule Mongo.Ecto do
       defmodule MyApp.Model do
         defmacro __using__(_) do
           quote do
-            use Ecto.Model
+            use EctoOne.Model
             @primary_key {:id, :binary_id, autogenerate: true}
             @foreign_key_type :binary_id # For associations
           end
         end
       end
 
-  Now, instead of `use Ecto.Model`, you can `use MyApp.Model` in your
-  modules. All Ecto types, except `:decimal`, are supported by `Mongo.Ecto`.
+  Now, instead of `use EctoOne.Model`, you can `use MyApp.Model` in your
+  modules. All EctoOne types, except `:decimal`, are supported by `Mongo.EctoOne`.
 
-  By defining a schema, Ecto automatically defines a struct with
+  By defining a schema, EctoOne automatically defines a struct with
   the schema fields:
 
       iex> weather = %Weather{temp_lo: 30}
@@ -123,10 +123,10 @@ defmodule Mongo.Ecto do
 
   ## Queries
 
-  `Mongo.Ecto` also supports writing queries in Elixir to interact with
+  `Mongo.EctoOne` also supports writing queries in Elixir to interact with
   your MongoDB. Let's see an example:
 
-      import Ecto.Query, only: [from: 2]
+      import EctoOne.Query, only: [from: 2]
 
       query = from w in Weather,
             where: w.prcp > 0 or is_nil(w.prcp),
@@ -145,9 +145,9 @@ defmodule Mongo.Ecto do
     * `:select`
     * `:preload`
 
-  When writing a query, you are inside Ecto's query syntax. In order to
+  When writing a query, you are inside EctoOne's query syntax. In order to
   access params values or invoke functions, you need to use the `^`
-  operator, which is overloaded by Ecto:
+  operator, which is overloaded by EctoOne:
 
       def min_prcp(min) do
         from w in Weather, where: w.prcp > ^min or is_nil(w.prcp)
@@ -162,8 +162,8 @@ defmodule Mongo.Ecto do
   a count - there is no support for querying using a count, there is also no
   support for counting documents and selecting them at the same time.
 
-  Please note that not all Ecto queries are valid MongoDB queries. The adapter
-  will raise `Ecto.QueryError` if it encounters one, and will try to be as
+  Please note that not all EctoOne queries are valid MongoDB queries. The adapter
+  will raise `EctoOne.QueryError` if it encounters one, and will try to be as
   specific as possible as to what exactly is causing the problem.
 
   For things that are not possible to express with Elixir's syntax in queries,
@@ -171,9 +171,9 @@ defmodule Mongo.Ecto do
 
       from p in Post, where: fragment("$exists": "name"), select: p
 
-  To ease of using in more advanced queries, there is `Mongo.Ecto.Helpers` module
+  To ease of using in more advanced queries, there is `Mongo.EctoOne.Helpers` module
   you could import into modules dealing with queries.
-  Please see the documentation of the `Mongo.Ecto.Helpers` module for more
+  Please see the documentation of the `Mongo.EctoOne.Helpers` module for more
   information and supported options.
 
   ### Options for reader functions (`Repo.all/2`, `Repo.one/2`, etc)
@@ -188,14 +188,14 @@ defmodule Mongo.Ecto do
   ## Commands
 
   MongoDB has many administrative commands you can use to manage your database.
-  We support them thourgh `Mongo.Ecto.command/2` function.
+  We support them thourgh `Mongo.EctoOne.command/2` function.
 
-      Mongo.Ecto.command(MyRepo, createUser: "ecto", ...)
+      Mongo.EctoOne.command(MyRepo, createUser: "ecto_one", ...)
 
-  We also support one higher level command - `Mongo.Ecto.truncate/1` that is
+  We also support one higher level command - `Mongo.EctoOne.truncate/1` that is
   used to clear the database, i.e. during testing.
 
-      Mongo.Ecto.truncate(MyRepo)
+      Mongo.EctoOne.truncate(MyRepo)
 
   You can use it in your `setup` call for cleaning the database before every
   test. You can define your own module to use instead of `ExUnit.Case`, so you
@@ -205,7 +205,7 @@ defmodule Mongo.Ecto do
         use ExUnit.CaseTemplate
 
         setup do
-          Mongo.Ecto.truncate(MyRepo)
+          Mongo.EctoOne.truncate(MyRepo)
           :ok
         end
       end
@@ -214,10 +214,10 @@ defmodule Mongo.Ecto do
 
   ## Associations
 
-  Ecto supports defining associations on schemas:
+  EctoOne supports defining associations on schemas:
 
       defmodule Post do
-        use Ecto.Model
+        use EctoOne.Model
 
         @primary_key {:id, :binary_id, autogenerate: true}
         @foreign_key_type :binary_id
@@ -227,23 +227,23 @@ defmodule Mongo.Ecto do
         end
       end
 
-  Keep in mind that Ecto associations are stored in different Mongo
+  Keep in mind that EctoOne associations are stored in different Mongo
   collections and multiple queries may be required for retriving them.
 
-  While `Mongo.Ecto` supports almost all association features in Ecto,
+  While `Mongo.EctoOne` supports almost all association features in EctoOne,
   keep in mind that MongoDB does not support joins as used in SQL - it's
   not possible to query your associations together with the main model.
 
-  Some more elaborate association schemas may force Ecto to use joins in
+  Some more elaborate association schemas may force EctoOne to use joins in
   some queries, that are not supported by MongoDB as well. One such call
-  is `Ecto.Model.assoc/2` function with a `has_many :through` association.
+  is `EctoOne.Model.assoc/2` function with a `has_many :through` association.
 
   You can find more information about defining associations and each respective
-  association module in `Ecto.Schema` docs.
+  association module in `EctoOne.Schema` docs.
 
   ## Embedded models
 
-  Ecto supports defining relations using embedding models directly inside the
+  EctoOne supports defining relations using embedding models directly inside the
   parent model, and that fits MongoDB's design perfectly.
 
       defmodule Post do
@@ -261,28 +261,28 @@ defmodule Mongo.Ecto do
       end
 
   You can find more information about defining embedded models in the
-  `Ecto.Schema` docs.
+  `EctoOne.Schema` docs.
 
   ## Indexes and Migrations
 
   Although schema migrations make no sense for databases such as MongoDB
   there is one field where they can be very benefitial - indexes. Because of
-  this Mongodb.Ecto supports Ecto's database migrations. You can generate a
+  this Mongodb.EctoOne supports EctoOne's database migrations. You can generate a
   migration with:
 
-      $ mix ecto.gen.migration create_posts
+      $ mix ecto_one.gen.migration create_posts
 
   This will create a new file inside `priv/repo/migrations` with the `up` and
-  `down` functions. Check `Ecto.Migration` for more information.
+  `down` functions. Check `EctoOne.Migration` for more information.
 
   Because MongoDB does not support (or need) database schemas majority of the
-  functionality provided by `Ecto.Migration` is not useful when working with
+  functionality provided by `EctoOne.Migration` is not useful when working with
   MongoDB. As we've already noted the most useful part is indexing, but there
   are others - creating capped collections, executing administrative commands,
   or migrating data, e.g.:
 
       defmodule SampleMigration do
-        use Ecto.Migration
+        use EctoOne.Migration
 
         def up do
           create table(:my_table, options: [capped: true, size: 1024])
@@ -311,9 +311,9 @@ defmodule Mongo.Ecto do
     * management commands with `command/2`
     * embedded documents either with `:map` type, or embedded models
     * partial updates using `change_map/2` and `change_array/2` from the
-      `Mongo.Ecto.Helpers` module
+      `Mongo.EctoOne.Helpers` module
     * queries using javascript expresssion and regexes using respectively
-      `javascript/2` and `regex/2` functions from `Mongo.Ecto.Helpers` module.
+      `javascript/2` and `regex/2` functions from `Mongo.EctoOne.Helpers` module.
 
   ### MongoDB adapter options
 
@@ -325,7 +325,7 @@ defmodule Mongo.Ecto do
   Those options should be set in the config file and require
   recompilation in order to make an effect.
 
-    * `:adapter` - The adapter name, in this case, `Mongo.Ecto`
+    * `:adapter` - The adapter name, in this case, `Mongo.EctoOne`
     * `:pool` - The connection pool module, defaults to `Mongo.Pool.Poolboy`
     * `:log_level` - The level to use when logging queries (default: `:debug`)
 
@@ -337,13 +337,13 @@ defmodule Mongo.Ecto do
     * `:password` - User password
     * `:connect_timeout` - The timeout for establishing new connections (default: 5000)
     * `:w` - MongoDB's write convern (default: 1). If set to 0, some of the
-      Ecto's functions may not work properely
+      EctoOne's functions may not work properely
     * `:j`, `:fsync`, `:wtimeout` - Other MongoDB's write concern options. Please
       consult MongoDB's documentation
 
   ### Pool options
 
-  `Mongo.Ecto` does not use Ecto pools, instead pools provided by the MongoDB
+  `Mongo.EctoOne` does not use EctoOne pools, instead pools provided by the MongoDB
   driver are used. The default poolboy adapter accepts following options:
 
     * `:pool_size` - The number of connections to keep in the pool (default: 10)
@@ -352,18 +352,18 @@ defmodule Mongo.Ecto do
   For other adapters, please see their documentation.
   """
 
-  @behaviour Ecto.Adapter
-  @behaviour Ecto.Adapter.Storage
-  @behaviour Ecto.Adapter.Migration
+  @behaviour EctoOne.Adapter
+  @behaviour EctoOne.Adapter.Storage
+  @behaviour EctoOne.Adapter.Migration
 
-  alias Mongo.Ecto.NormalizedQuery
-  alias Mongo.Ecto.NormalizedQuery.ReadQuery
-  alias Mongo.Ecto.NormalizedQuery.WriteQuery
-  alias Mongo.Ecto.NormalizedQuery.CountQuery
-  alias Mongo.Ecto.NormalizedQuery.AggregateQuery
-  alias Mongo.Ecto.ObjectID
-  alias Mongo.Ecto.Connection
-  alias Mongo.Ecto.Conversions
+  alias Mongo.EctoOne.NormalizedQuery
+  alias Mongo.EctoOne.NormalizedQuery.ReadQuery
+  alias Mongo.EctoOne.NormalizedQuery.WriteQuery
+  alias Mongo.EctoOne.NormalizedQuery.CountQuery
+  alias Mongo.EctoOne.NormalizedQuery.AggregateQuery
+  alias Mongo.EctoOne.ObjectID
+  alias Mongo.EctoOne.Connection
+  alias Mongo.EctoOne.Conversions
 
   ## Adapter
 
@@ -378,7 +378,7 @@ defmodule Mongo.Ecto do
         use Mongo.Pool, name: __MODULE__, adapter: unquote(adapter)
 
         def log(return, queue_time, query_time, fun, args) do
-          Mongo.Ecto.log(unquote(module), return, queue_time, query_time, fun, args)
+          Mongo.EctoOne.log(unquote(module), return, queue_time, query_time, fun, args)
         end
       end
 
@@ -388,7 +388,7 @@ defmodule Mongo.Ecto do
 
   @doc false
   def start_link(repo, opts) do
-    {:ok, _} = Application.ensure_all_started(:mongodb_ecto)
+    {:ok, _} = Application.ensure_all_started(:mongodb_ecto_one)
 
     repo.__mongo_pool__.start_link(opts)
   end
@@ -402,7 +402,7 @@ defmodule Mongo.Ecto do
     after
       timeout -> exit(:timeout)
     end
-    Application.stop(:mongodb_ecto)
+    Application.stop(:mongodb_ecto_one)
     :ok
   end
 
@@ -414,24 +414,24 @@ defmodule Mongo.Ecto do
     do: ObjectID.load(value)
   def load(:binary, %BSON.Binary{binary: value}),
     do: {:ok, value}
-  def load(Ecto.UUID, %BSON.Binary{binary: value}),
+  def load(EctoOne.UUID, %BSON.Binary{binary: value}),
     do: {:ok, value}
   def load(:map, keyword),
     do: {:ok, Enum.into(keyword, %{})}
-  def load(Ecto.Date, %BSON.DateTime{} = datetime) do
+  def load(EctoOne.Date, %BSON.DateTime{} = datetime) do
     {date, _time} = BSON.DateTime.to_datetime(datetime)
-    Ecto.Date.load(date)
+    EctoOne.Date.load(date)
   end
-  def load(Ecto.Time, %BSON.DateTime{} = datetime) do
+  def load(EctoOne.Time, %BSON.DateTime{} = datetime) do
     {_date, time} = BSON.DateTime.to_datetime(datetime)
-    Ecto.Time.load(time)
+    EctoOne.Time.load(time)
   end
-  def load(Ecto.DateTime, %BSON.DateTime{} = datetime),
-    do: datetime |> BSON.DateTime.to_datetime |> Ecto.DateTime.load
+  def load(EctoOne.DateTime, %BSON.DateTime{} = datetime),
+    do: datetime |> BSON.DateTime.to_datetime |> EctoOne.DateTime.load
   def load(module, %BSON.DateTime{} = datetime),
     do: datetime |> BSON.DateTime.to_datetime |> module.load
   def load(type, data),
-    do: Ecto.Type.load(type, data, &load/2)
+    do: EctoOne.Type.load(type, data, &load/2)
 
   @doc false
   def dump(_type, nil),
@@ -440,24 +440,24 @@ defmodule Mongo.Ecto do
     do: ObjectID.dump(data)
   def dump(:binary, value),
     do: {:ok, %BSON.Binary{binary: value}}
-  def dump(Ecto.UUID, value),
+  def dump(EctoOne.UUID, value),
     do: {:ok, %BSON.Binary{binary: value, subtype: :uuid}}
-  def dump(Ecto.Date, datetime),
+  def dump(EctoOne.Date, datetime),
     do: from_datetime(datetime)
-  def dump(Ecto.Time, datetime),
+  def dump(EctoOne.Time, datetime),
     do: from_datetime(datetime)
-  def dump(Ecto.DateTime, datetime),
+  def dump(EctoOne.DateTime, datetime),
     do: from_datetime(datetime)
   def dump(type, data),
-    do: Ecto.Type.dump(type, data, &dump/2)
+    do: EctoOne.Type.dump(type, data, &dump/2)
 
   @epoch :calendar.datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})
 
-  def from_datetime(%Ecto.Date{year: year, month: month, day: day}),
+  def from_datetime(%EctoOne.Date{year: year, month: month, day: day}),
     do: from_datetime({{year, month, day}, {0, 0, 0, 0}})
-  def from_datetime(%Ecto.Time{hour: hour, min: min, sec: sec, usec: usec}),
+  def from_datetime(%EctoOne.Time{hour: hour, min: min, sec: sec, usec: usec}),
     do: from_datetime({{1970, 1, 1}, {hour, min, sec, usec}})
-  def from_datetime(%Ecto.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}),
+  def from_datetime(%EctoOne.DateTime{year: year, month: month, day: day, hour: hour, min: min, sec: sec, usec: usec}),
     do: from_datetime({{year, month, day}, {hour, min, sec, usec}})
   def from_datetime({_, _, _, _} = time),
     do: from_datetime({{1970, 1, 1}, time})
@@ -582,13 +582,13 @@ defmodule Mongo.Ecto do
   end
 
   defp process_document(document, %{fields: fields, pk: pk}, preprocess) do
-    document = Conversions.to_ecto_pk(document, pk)
+    document = Conversions.to_ecto_one_pk(document, pk)
 
     Enum.map(fields, fn
       {:field, name, field} ->
         preprocess.(field, Map.get(document, Atom.to_string(name)), nil)
       {:value, value, field} ->
-        preprocess.(field, Conversions.to_ecto_pk(value, pk), nil)
+        preprocess.(field, Conversions.to_ecto_one_pk(value, pk), nil)
       field ->
         preprocess.(field, document, nil)
     end)
@@ -609,8 +609,8 @@ defmodule Mongo.Ecto do
 
   ## Migration
 
-  alias Ecto.Migration.Table
-  alias Ecto.Migration.Index
+  alias EctoOne.Migration.Table
+  alias EctoOne.Migration.Index
 
   @doc false
   def supports_ddl_transaction?, do: false
@@ -702,7 +702,7 @@ defmodule Mongo.Ecto do
   defp warn_on_references!(columns) do
     has_references? =
       Enum.any?(columns, fn
-        {_, _, %Ecto.Migration.Reference{}, _} -> true
+        {_, _, %EctoOne.Migration.Reference{}, _} -> true
         _other                                 -> false
       end)
 
@@ -721,7 +721,7 @@ defmodule Mongo.Ecto do
 
   Returns list of dropped collections.
   """
-  @spec truncate(Ecto.Repo.t, Keyword.t) :: [String.t]
+  @spec truncate(EctoOne.Repo.t, Keyword.t) :: [String.t]
   def truncate(repo, opts \\ []) do
     opts = Keyword.put(opts, :log, false)
 
@@ -736,7 +736,7 @@ defmodule Mongo.Ecto do
 
   ## Usage
 
-      Mongo.Ecto.command(Repo, drop: "collection")
+      Mongo.EctoOne.command(Repo, drop: "collection")
 
   ## Options
 
@@ -746,7 +746,7 @@ defmodule Mongo.Ecto do
 
   For list of available commands plese see: http://docs.mongodb.org/manual/reference/command/
   """
-  @spec command(Ecto.Repo.t, BSON.document, Keyword.t) :: BSON.document
+  @spec command(EctoOne.Repo.t, BSON.document, Keyword.t) :: BSON.document
   def command(repo, command, opts \\ []) do
     normalized = NormalizedQuery.command(command, opts)
 
@@ -754,7 +754,7 @@ defmodule Mongo.Ecto do
   end
 
   special_regex = %BSON.Regex{pattern: "\\.system|\\$", options: ""}
-  @migration Ecto.Migration.SchemaMigration.__schema__(:source)
+  @migration EctoOne.Migration.SchemaMigration.__schema__(:source)
   migration_regex = %BSON.Regex{pattern: @migration, options: ""}
 
   @list_collections_query ["$and": [[name: ["$not": special_regex]],
@@ -806,7 +806,7 @@ defmodule Mongo.Ecto do
   end
   def log(repo, return, queue_time, query_time, fun, args) do
     entry =
-      %Ecto.LogEntry{query: &format_log(&1, fun, args), params: [],
+      %EctoOne.LogEntry{query: &format_log(&1, fun, args), params: [],
                      result: return, query_time: query_time, queue_time: queue_time}
     repo.log(entry)
   end

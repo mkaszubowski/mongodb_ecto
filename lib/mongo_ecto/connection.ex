@@ -1,24 +1,24 @@
-defmodule Mongo.Ecto.Connection do
+defmodule Mongo.EctoOne.Connection do
   @moduledoc false
 
-  alias Mongo.Ecto.NormalizedQuery.ReadQuery
-  alias Mongo.Ecto.NormalizedQuery.WriteQuery
-  alias Mongo.Ecto.NormalizedQuery.CommandQuery
-  alias Mongo.Ecto.NormalizedQuery.CountQuery
-  alias Mongo.Ecto.NormalizedQuery.AggregateQuery
+  alias Mongo.EctoOne.NormalizedQuery.ReadQuery
+  alias Mongo.EctoOne.NormalizedQuery.WriteQuery
+  alias Mongo.EctoOne.NormalizedQuery.CommandQuery
+  alias Mongo.EctoOne.NormalizedQuery.CountQuery
+  alias Mongo.EctoOne.NormalizedQuery.AggregateQuery
 
   ## Worker
 
   def storage_down(opts) do
     opts = Keyword.put(opts, :size, 1)
 
-    {:ok, _} = Mongo.Ecto.AdminPool.start_link(opts)
+    {:ok, _} = Mongo.EctoOne.AdminPool.start_link(opts)
 
     try do
-      Mongo.run_command(Mongo.Ecto.AdminPool, dropDatabase: 1)
+      Mongo.run_command(Mongo.EctoOne.AdminPool, dropDatabase: 1)
       :ok
     after
-      true = Mongo.Ecto.AdminPool.stop
+      true = Mongo.EctoOne.AdminPool.stop
     end
   end
 
