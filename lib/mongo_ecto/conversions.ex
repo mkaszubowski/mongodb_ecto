@@ -74,6 +74,7 @@ defmodule Mongo.EctoOne.Conversions do
   defp key(pk, pk), do: :_id
   defp key(key, _), do: key
 
+  defp map(map, _fun) when is_map(map) and map_size(map) == 0, do: {:ok, %{}}
   defp map(list, fun) do
     return =
       Enum.flat_map_reduce(list, :ok, fn elem, :ok ->
